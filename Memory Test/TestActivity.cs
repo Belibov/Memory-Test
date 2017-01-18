@@ -47,7 +47,7 @@ namespace Memory_Test
 
             lives = 3;
             combo = 0;
-            level = 22;
+            level = 1;
             score = 0;
             txtTestLevel = FindViewById<TextView>(Resource.Id.txtTestLevel);
             txtYourLives = FindViewById<TextView>(Resource.Id.txtYourLives);
@@ -56,8 +56,7 @@ namespace Memory_Test
 
             this.assignAllButtons();
             this.setAllInfo();
-            this.generateRandomButtons();
-            this.activateButtonsDemo();
+            this.start();
             for (int i = 0; i < 9; i++)
             {
                 var button = testButtons[i];
@@ -95,6 +94,7 @@ namespace Memory_Test
             setAllInfo();
             resetButtons();
             resetPressedIndexes();
+            generateRandomButtons();
             activateButtonsDemo();
         }
 
@@ -104,54 +104,6 @@ namespace Memory_Test
             this.setCurrentLives();
             this.setCurrentCombo();
             this.setCurrentScore();
-        }
-
-        private void setCurrentLevel()
-        {
-            var currentString = "LEVEL " + level;
-            var spanCurrentString = new SpannableString(currentString);
-
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
-            txtTestLevel.SetText(spanCurrentString, TextView.BufferType.Spannable);
-        }
-
-        private void setCurrentLives()
-        {
-            var currentString = "LIVES " + lives;
-            var spanCurrentString = new SpannableString(currentString);
-
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
-            txtYourLives.SetText(spanCurrentString, TextView.BufferType.Spannable);
-        }
-
-        private void setCurrentCombo()
-        {
-            var currentString = "COMBO X" + combo;
-            var spanCurrentString = new SpannableString(currentString);
-
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
-            txtYourCombo.SetText(spanCurrentString, TextView.BufferType.Spannable);
-        }
-
-        private void setCurrentScore()
-        {
-            var currentString = score + " POINTS";
-            var spanCurrentString = new SpannableString(currentString);
-
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), currentString.Length - 6, currentString.Length, 0);
-            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 0, currentString.Length - 7, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), currentString.Length - 6, currentString.Length, 0);
-            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, currentString.Length - 7, 0);
-            txtTestScore.SetText(spanCurrentString, TextView.BufferType.Spannable);
         }
 
         private double getWaitTime()
@@ -202,6 +154,7 @@ namespace Memory_Test
             this.resetPressedIndexes();
             this.setAllInfo();
             this.resetButtons();
+            this.start();
         }
 
         private void onFailSolve()
@@ -221,7 +174,6 @@ namespace Memory_Test
 
         async private void endTest()
         {
-
             string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
             string filename = System.IO.Path.Combine(path, "myfile.txt");
             path = filename;
@@ -283,6 +235,22 @@ namespace Memory_Test
                 testButtons[i].Click += testButtons_Click;
             }
         }
+        
+        private void generateRandomButtons()
+        {
+            int t = -1;
+            Random random = new Random();
+            for (int i = 0; i < this.getCountButtons(); i++)
+            {
+                t = random.Next(0, 9);
+                while (this.pressedIndexes.Contains(t))
+                {
+                    t = random.Next(0, 9);
+                }
+                System.Diagnostics.Debug.WriteLine("GENERATED INDEX button " + t);
+                this.pressedIndexes[i] = t;
+            }
+        }
 
         private void resetButtons()
         {
@@ -291,6 +259,27 @@ namespace Memory_Test
                 this.testButtons[i].SetBackgroundResource(Resource.Drawable.TestButtonUnchecked);
             }
             btn_ind = 0;
+        }
+
+        private void assignAllButtons()
+        {
+            this.testButtons[0] = FindViewById<Button>(Resource.Id.testThree1);
+            this.testButtons[1] = FindViewById<Button>(Resource.Id.testThree2);
+            this.testButtons[2] = FindViewById<Button>(Resource.Id.testThree3);
+            this.testButtons[3] = FindViewById<Button>(Resource.Id.testThree4);
+            this.testButtons[4] = FindViewById<Button>(Resource.Id.testThree5);
+            this.testButtons[5] = FindViewById<Button>(Resource.Id.testThree6);
+            this.testButtons[6] = FindViewById<Button>(Resource.Id.testThree7);
+            this.testButtons[7] = FindViewById<Button>(Resource.Id.testThree8);
+            this.testButtons[8] = FindViewById<Button>(Resource.Id.testThree9);
+        }
+
+        private void resetPressedIndexes()
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                pressedIndexes[i] = -1;
+            }
         }
 
         private int getCountButtons()
@@ -321,41 +310,52 @@ namespace Memory_Test
             }
         }
 
-        private void generateRandomButtons()
+        private void setCurrentLevel()
         {
-            int t = -1;
-            Random random = new Random();
-            for (int i = 0; i < this.getCountButtons(); i++)
-            {
-                t = random.Next(0, 9);
-                while (this.pressedIndexes.Contains(t))
-                {
-                    t = random.Next(0, 9);
-                }
-                System.Diagnostics.Debug.WriteLine("GENERATED INDEX button " + t);
-                this.pressedIndexes[i] = t;
-            }
+            var currentString = "LEVEL " + level;
+            var spanCurrentString = new SpannableString(currentString);
+
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
+            txtTestLevel.SetText(spanCurrentString, TextView.BufferType.Spannable);
         }
 
-        private void assignAllButtons()
+        private void setCurrentLives()
         {
-            this.testButtons[0] = FindViewById<Button>(Resource.Id.testThree1);
-            this.testButtons[1] = FindViewById<Button>(Resource.Id.testThree2);
-            this.testButtons[2] = FindViewById<Button>(Resource.Id.testThree3);
-            this.testButtons[3] = FindViewById<Button>(Resource.Id.testThree4);
-            this.testButtons[4] = FindViewById<Button>(Resource.Id.testThree5);
-            this.testButtons[5] = FindViewById<Button>(Resource.Id.testThree6);
-            this.testButtons[6] = FindViewById<Button>(Resource.Id.testThree7);
-            this.testButtons[7] = FindViewById<Button>(Resource.Id.testThree8);
-            this.testButtons[8] = FindViewById<Button>(Resource.Id.testThree9);
+            var currentString = "LIVES " + lives;
+            var spanCurrentString = new SpannableString(currentString);
+
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
+            txtYourLives.SetText(spanCurrentString, TextView.BufferType.Spannable);
         }
 
-        private void resetPressedIndexes()
+        private void setCurrentCombo()
         {
-            for (int i = 0; i < 9; i++)
-            {
-                pressedIndexes[i] = -1;
-            }
+            var currentString = "COMBO X" + combo;
+            var spanCurrentString = new SpannableString(currentString);
+
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), 0, 5, 0);
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 6, currentString.Length, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), 0, 5, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 6, currentString.Length, 0);
+            txtYourCombo.SetText(spanCurrentString, TextView.BufferType.Spannable);
+        }
+
+        private void setCurrentScore()
+        {
+            var currentString = score + " POINTS";
+            var spanCurrentString = new SpannableString(currentString);
+
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(203, 203, 203)), currentString.Length - 6, currentString.Length, 0);
+            spanCurrentString.SetSpan(new ForegroundColorSpan(Color.Rgb(255, 255, 255)), 0, currentString.Length - 7, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Normal), currentString.Length - 6, currentString.Length, 0);
+            spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, currentString.Length - 7, 0);
+            txtTestScore.SetText(spanCurrentString, TextView.BufferType.Spannable);
         }
     }
 }
