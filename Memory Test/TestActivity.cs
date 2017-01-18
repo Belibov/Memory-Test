@@ -12,6 +12,9 @@ using Android.Widget;
 using Android.Text;
 using Android.Text.Style;
 using Android.Graphics;
+using System.Threading;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Memory_Test
 {
@@ -27,10 +30,13 @@ namespace Memory_Test
         private TextView txtYourLives;
         private TextView txtYourCombo;
         private TextView txtTestScore;
-        private LinearLayout linearLayoutTest;
 
         private Button[] testButtons = new Button[9];
         private int[] pressedIndexes = new int[9];
+
+        //private List<int> automatPressed = new List<int>();
+        private int btn_ind;
+
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -41,7 +47,7 @@ namespace Memory_Test
 
             lives = 3;
             combo = 0;
-            level = 1;
+            level = 22;
             score = 0;
             txtTestLevel = FindViewById<TextView>(Resource.Id.txtTestLevel);
             txtYourLives = FindViewById<TextView>(Resource.Id.txtYourLives);
@@ -50,7 +56,46 @@ namespace Memory_Test
 
             this.assignAllButtons();
             this.setAllInfo();
+            this.generateRandomButtons();
+            this.activateButtonsDemo();
+            for (int i = 0; i < 9; i++)
+            {
+                var button = testButtons[i];
+                button.Tag = i;
+                button.Click += testButtons_Click;
+            }
+        }
 
+        private void testButtons_Click(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null)
+            {
+                var index = (int)button.Tag;
+                System.Diagnostics.Debug.WriteLine("INDEX OF CLICKED BUTTON: " + index);
+                if (index == pressedIndexes[btn_ind] && btn_ind == this.getCountButtons() - 1)
+                {
+                    this.onSuccessSolve();
+                }
+                else if (index == pressedIndexes[btn_ind])
+                {
+                    button.SetBackgroundResource(Resource.Drawable.TestButtonChecked);
+                    button.Click -= testButtons_Click;
+                }
+                else
+                {
+                    this.onFailSolve();
+                }
+            }
+            btn_ind++;
+        }
+
+        private void start()
+        {
+            setAllInfo();
+            resetButtons();
+            resetPressedIndexes();
+            activateButtonsDemo();
         }
 
         private void setAllInfo()
@@ -108,37 +153,45 @@ namespace Memory_Test
             spanCurrentString.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, currentString.Length - 7, 0);
             txtTestScore.SetText(spanCurrentString, TextView.BufferType.Spannable);
         }
-        
+
         private double getWaitTime()
         {
             if (this.level < 5)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 8;
-            } else if (this.level < 10)
+            }
+            else if (this.level < 10)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 7;
-            } else if (this.level < 15)
+            }
+            else if (this.level < 15)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 6;
-            } else if (this.level < 20)
+            }
+            else if (this.level < 20)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 5;
-            } else if (this.level < 25)
+            }
+            else if (this.level < 25)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 4.5;
-            } else if (this.level < 30)
+            }
+            else if (this.level < 30)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 4;
-            } else if (this.level < 40)
+            }
+            else if (this.level < 40)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 3.2;
-            } else if (this.level < 50)
+            }
+            else if (this.level < 50)
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 2.4;
-            } else
+            }
+            else
             {
                 return Math.Sqrt(10.0 + this.level) / (10.0 + this.level) * 1.2;
-            }  
+            }
         }
 
         private void onSuccessSolve()
@@ -166,13 +219,28 @@ namespace Memory_Test
             this.resetButtons();
         }
 
-        private void endTest()
+        async private void endTest()
         {
-            //WRITE TO FILE RESULTS!!!!!
-            //VERY IMPORTANT!!!!
-            //DON`T FORGET!!!!!
+
+            string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            string filename = System.IO.Path.Combine(path, "myfile.txt");
+            path = filename;
+            if (!File.Exists(path))
+            {
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    sw.WriteLine(score);
+                }
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(path))
+                {
+                    sw.WriteLine(score);
+                }
+            }
             txtTestScore.Text = "Test finished!";
-            System.Threading.Thread.Sleep(3000);
+            await Task.Delay(4000);
             lives = 3;
             combo = 0;
             level = 1;
@@ -182,7 +250,7 @@ namespace Memory_Test
             this.setAllInfo();
         }
 
-        private void activateButtonsDemo()
+        async private void activateButtonsDemo()
         {
             int count = this.getCountButtons();
             double time = this.getWaitTime();
@@ -193,8 +261,27 @@ namespace Memory_Test
                 this.testButtons[i].SetBackgroundResource(Resource.Drawable.TestButtonChecked);
                 System.Threading.Thread.Sleep(mseconds);
             }
+            for (int i = 0; i < 9; i++)
+            {
+                testButtons[i].Click -= testButtons_Click;
+            }
+            /*int count = this.getCountButtons();
+            double time = this.getWaitTime();
+            int mseconds = (int)(time * 1000);*/
+
+            for (int i = 0; i < count; i++)
+            {
+                System.Diagnostics.Debug.WriteLine("Activating button " + i);
+                testButtons[pressedIndexes[i]].SetBackgroundResource(Resource.Drawable.TestButtonChecked);
+                await Task.Delay(mseconds);
+            }
+            //resetButtons();
 
             this.resetButtons();
+            for (int i = 0; i < 9; i++)
+            {
+                testButtons[i].Click += testButtons_Click;
+            }
         }
 
         private void resetButtons()
@@ -203,6 +290,7 @@ namespace Memory_Test
             {
                 this.testButtons[i].SetBackgroundResource(Resource.Drawable.TestButtonUnchecked);
             }
+            btn_ind = 0;
         }
 
         private int getCountButtons()
@@ -210,19 +298,24 @@ namespace Memory_Test
             if (this.level < 5)
             {
                 return 1;
-            } else if (this.level < 9)
+            }
+            else if (this.level < 9)
             {
                 return 2;
-            } else if (this.level < 17)
+            }
+            else if (this.level < 17)
             {
                 return 3;
-            } else if (this.level < 25)
+            }
+            else if (this.level < 25)
             {
                 return 4;
-            } else if (this.level < 35)
+            }
+            else if (this.level < 35)
             {
                 return 5;
-            } else
+            }
+            else
             {
                 return 6;
             }
@@ -234,10 +327,12 @@ namespace Memory_Test
             Random random = new Random();
             for (int i = 0; i < this.getCountButtons(); i++)
             {
+                t = random.Next(0, 9);
                 while (this.pressedIndexes.Contains(t))
                 {
                     t = random.Next(0, 9);
                 }
+                System.Diagnostics.Debug.WriteLine("GENERATED INDEX button " + t);
                 this.pressedIndexes[i] = t;
             }
         }

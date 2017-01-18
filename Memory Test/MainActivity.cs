@@ -8,7 +8,7 @@ using Android.OS;
 
 namespace Memory_Test
 {
-    [Activity(Label = "Memory Test", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait,Icon = "@drawable/ic_launcher")]
+    [Activity(Label = "Memory Test", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait, Icon = "@drawable/ic_launcher")]
     public class MainActivity : Activity
     {
         private Button btnStartTest;
@@ -50,4 +50,3 @@ namespace Memory_Test
         }
     }
 }
-
