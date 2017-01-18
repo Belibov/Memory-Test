@@ -207,16 +207,12 @@ namespace Memory_Test
             int count = this.getCountButtons();
             double time = this.getWaitTime();
             int mseconds = (int)(time * 1000);
-
-            for (int i = 0; i < count; i++)
-            {
-                this.testButtons[i].SetBackgroundResource(Resource.Drawable.TestButtonChecked);
-                System.Threading.Thread.Sleep(mseconds);
-            }
+            
             for (int i = 0; i < 9; i++)
             {
                 testButtons[i].Click -= testButtons_Click;
             }
+            await Task.Delay(2000);
             /*int count = this.getCountButtons();
             double time = this.getWaitTime();
             int mseconds = (int)(time * 1000);*/
