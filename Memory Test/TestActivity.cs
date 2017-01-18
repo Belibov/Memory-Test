@@ -149,8 +149,8 @@ namespace Memory_Test
         private void onSuccessSolve()
         {
             this.score += (int)((1 + this.level * 0.5) * 10 * (1 + this.combo * 0.1));
-            this.combo++;
             this.level++;
+            this.combo++;
             this.resetPressedIndexes();
             this.setAllInfo();
             this.resetButtons();
@@ -164,12 +164,12 @@ namespace Memory_Test
             if (this.lives <= 0)
             {
                 this.endTest();
-                return;
+            } else
+            {
+                this.resetPressedIndexes();
+                this.setAllInfo();
+                this.resetButtons();
             }
-            this.level++;
-            this.resetPressedIndexes();
-            this.setAllInfo();
-            this.resetButtons();
         }
 
         async private void endTest()
